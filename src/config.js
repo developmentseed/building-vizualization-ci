@@ -7,7 +7,7 @@ export const rasterLayers = [
         id: 'esri-world-imagery',
         name: 'Esri World Imagery',
         source: 'https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        active: false
+        active: true
     }
 ];
 

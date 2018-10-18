@@ -1,9 +1,9 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-
 import mapboxgl from 'mapbox-gl';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import axios from 'axios';
+import * as turf from '@turf/turf'
 import _ from 'underscore';
 import { mapConfig } from './../config';
 import { rasterLayers, vectorLayers } from './../config';
@@ -16,7 +16,7 @@ class ConnectedMap extends React.Component {
     this.state = {
       lng: 44.4237,
       lat: 33.3146,
-      zoom: 12
+      zoom: 11
     };
   }
   componentDidMount() {
@@ -39,23 +39,41 @@ class ConnectedMap extends React.Component {
   loadVectorLayers = () => {
     for (let i = 0; i < vectorLayers.length; i++) {
       const layer = vectorLayers[i];
-      this.map.addSource(layer.id, {
-        type: 'geojson',
-        data: layer.source
-      });
-      this.map.addLayer({
-        'id': layer.id,
-        'type': 'fill',
-        'source': layer.id,
-        'layout': {},
-        'paint': {
-          'fill-color': '#088',
-          'fill-opacity': 0.8
-        }
-      });
-      if (!layer.active) {
-        this.map.setLayoutProperty(layer.id, 'visibility', 'none');
-      }
+      const that = this;
+      axios.get(layer.source)
+        .then(function (response) {
+          that.map.addSource(layer.id, {
+            type: 'geojson',
+            data: response.data
+          });
+          that.map.addLayer({
+            'id': layer.id,
+            'type': 'fill',
+            'source': layer.id,
+            'layout': {},
+            'paint': {
+              'fill-color': '#f9f024',
+              'fill-opacity': 0.1
+            }
+          });
+          that.map.addLayer({
+            "id": layer.id + '-l',
+            "type": "line",
+            "source": layer.id,
+            "layout": {
+              "line-join": "round",
+              "line-cap": "round"
+            },
+            "paint": {
+              "line-color": "#f9f024",
+              "line-width": 1
+            }
+          });
+          if (!layer.active) {
+            that.map.setLayoutProperty(layer.id, 'visibility', 'none');
+            that.map.setLayoutProperty(layer.id + '-l', 'visibility', 'none');
+          }
+        });
     }
   }
 
@@ -86,11 +104,12 @@ class ConnectedMap extends React.Component {
       this.map.setLayoutProperty(rasterLayer.id, 'visibility', rasterLayer.active ? 'visible' : 'none');
     }
     if (vectorLayer && vectorLayer.id) {
-      this.map.setLayoutProperty(vectorLayer.id, 'visibility', vectorLayer.active ? 'visible' : 'none');
+      var bbox = turf.bbox(this.map.getSource(vectorLayer.id)._options.data);
+      this.map.fitBounds(bbox);
+      // this.map.setLayoutProperty(vectorLayer.id, 'visibility', vectorLayer.active ? 'visible' : 'none');
+      // this.map.setLayoutProperty(vectorLayer.id + '-l', 'visibility', vectorLayer.active ? 'visible' : 'none');
+
     }
-
-    //Popup
-
   }
   render() {
     return <div ref={el => (this.mapContainer = el)} className="mapContent" />;
@@ -101,7 +120,6 @@ const mapStateToProps = state => {
   return {
     rasterLayer: state.rasterLayer,
     vectorLayer: state.vectorLayer
-
   };
 };
 
