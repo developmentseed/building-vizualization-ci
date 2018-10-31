@@ -71,7 +71,7 @@ class ConnectedMap extends React.Component {
           });
           if (!layer.active) {
             that.map.setLayoutProperty(layer.id, 'visibility', 'none');
-            that.map.setLayoutProperty(layer.id + '-l', 'visibility', 'none');
+            that.map.setLayoutProperty(layer.id + '-l', 'visibility', 'none');            
           }
         });
     }
@@ -104,10 +104,10 @@ class ConnectedMap extends React.Component {
       this.map.setLayoutProperty(rasterLayer.id, 'visibility', rasterLayer.active ? 'visible' : 'none');
     }
     if (vectorLayer && vectorLayer.id) {
-      var bbox = turf.bbox(this.map.getSource(vectorLayer.id)._options.data);
-      this.map.fitBounds(bbox);
-      // this.map.setLayoutProperty(vectorLayer.id, 'visibility', vectorLayer.active ? 'visible' : 'none');
-      // this.map.setLayoutProperty(vectorLayer.id + '-l', 'visibility', vectorLayer.active ? 'visible' : 'none');
+       var bbox = turf.bbox(this.map.getSource(vectorLayer.id)._options.data);
+       this.map.fitBounds(bbox);
+      this.map.setLayoutProperty(vectorLayer.id, 'visibility', vectorLayer.active ? 'visible' : 'none');
+      this.map.setLayoutProperty(vectorLayer.id + '-l', 'visibility', vectorLayer.active ? 'visible' : 'none');
 
     }
   }
